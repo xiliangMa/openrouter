@@ -13,7 +13,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen">
+    <>
       {/* Hero Section */}
       <section className="py-20 px-4 text-center">
         <h1 className="text-5xl font-bold tracking-tight mb-6">
@@ -132,13 +132,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 border-t">
-        <div className="max-w-6xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2024 MassRouter SaaS Platform. All rights reserved.</p>
-          <p className="mt-2">Built for developers, by developers.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }
