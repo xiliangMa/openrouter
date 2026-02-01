@@ -130,12 +130,6 @@ export default function Home() {
             </div>
           )}
         </div>
-        {/* Debug Info */}
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg text-sm">
-          <p>Debug: isLoading={isLoading ? 'true' : 'false'}, error={error ? error.message : 'null'}, data={data ? 'present' : 'null'}</p>
-          {data && <p>Data keys: {Object.keys(data).join(', ')}</p>}
-          {data?.data && <p>Models count: {data.data.models?.length || 0}</p>}
-        </div>
       </section>
 
       {/* CTA Section */}
