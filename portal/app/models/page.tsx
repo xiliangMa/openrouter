@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import ProtectedRoute from '@/components/protected-route';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -256,10 +257,12 @@ export default function ModelsPage() {
                               </Badge>
                             )}
                           </div>
-                          <Button size="sm">
-                            <Eye className="mr-2 h-3 w-3" />
-                            View Details
-                          </Button>
+                          <Link href={`/models/${model.id}`}>
+                            <Button size="sm">
+                              <Eye className="mr-2 h-3 w-3" />
+                              View Details
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </CardContent>
