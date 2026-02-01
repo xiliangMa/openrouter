@@ -436,3 +436,47 @@ type QueueStatus struct {
 	ErrorsLastHour    int       `json:"errors_last_hour"`
 	AvgProcessingTime float64   `json:"avg_processing_time"`
 }
+
+// OAuth-related request/response types
+type OAuthService interface {
+	GetEnabledProviders(ctx context.Context) ([]*OAuthProviderInfo, error)
+	StartOAuthFlow(ctx context.Context, req *StartOAuthFlowRequest) (string, error)
+	HandleOAuthCallback(ctx context.Context, req *HandleOAuthCallbackRequest) (*OAuthLoginResponse, error)
+	DisconnectOAuthAccount(ctx context.Context, userID string, req *DisconnectOAuthAccountRequest) error
+}
+
+type OAuthProviderInfo struct {
+	Name        string                 `json:"name"`
+	DisplayName string                 `json:"display_name"`
+	ClientID    string                 `json:"client_id"`
+	AuthURL     string                 `json:"auth_url"`
+	TokenURL    string                 `json:"token_url"`
+	UserInfoURL string                 `json:"user_info_url"`
+	Scopes      string                 `json:"scopes"`
+	Enabled     bool                   `json:"enabled"`
+	Config      map[string]interface{} `json:"config"`
+}
+
+type StartOAuthFlowRequest struct {
+	Provider    string `json:"provider" validate:"required"`
+	CallbackURL string `json:"callback_url" validate:"required,url"`
+	State       string `json:"state,omitempty"`
+}
+
+type HandleOAuthCallbackRequest struct {
+	Provider string `json:"provider" validate:"required"`
+	Code     string `json:"code" validate:"required"`
+	State    string `json:"state" validate:"required"`
+}
+
+type DisconnectOAuthAccountRequest struct {
+	Provider string `json:"provider" validate:"required"`
+}
+
+type OAuthLoginResponse struct {
+	User         *model.User `json:"user"`
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
+	ExpiresIn    int64       `json:"expires_in"`
+	IsNewUser    bool        `json:"is_new_user"`
+}

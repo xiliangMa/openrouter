@@ -10,6 +10,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"massrouter.ai/backend/internal/model"
+	"massrouter.ai/backend/pkg/utils"
 )
 
 func main() {
@@ -122,6 +123,80 @@ func main() {
 			}
 		} else {
 			fmt.Printf("⚠️ Config exists: %s\n", c.Key)
+		}
+	}
+
+	fmt.Println("\nSeeding admin user...")
+	// Check for existing admin users with either email
+	adminEmails := []string{"admin@massrouter.ai", "admin@openrouter.ai"}
+
+	for _, adminEmail := range adminEmails {
+		var existingAdmin model.User
+		if err := db.WithContext(ctx).Where("email = ?", adminEmail).First(&existingAdmin).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				continue // Try next email
+			}
+		} else {
+			// Found existing admin user
+			fmt.Printf("⚠️ Admin user already exists: %s (role: %s)\n", existingAdmin.Email, existingAdmin.Role)
+			// Update role to admin if not already
+			if existingAdmin.Role != "admin" {
+				existingAdmin.Role = "admin"
+				if err := db.WithContext(ctx).Save(&existingAdmin).Error; err != nil {
+					log.Printf("Failed to update admin user role: %v", err)
+				} else {
+					fmt.Printf("✅ Updated user role to admin: %s\n", existingAdmin.Email)
+				}
+			}
+			// Also update username to 'admin' if different
+			if existingAdmin.Username != "admin" {
+				existingAdmin.Username = "admin"
+				if err := db.WithContext(ctx).Save(&existingAdmin).Error; err != nil {
+					log.Printf("Failed to update admin username: %v", err)
+				}
+			}
+			// Update password to admin123 if needed
+			if !utils.VerifyPassword("admin123", existingAdmin.PasswordHash) {
+				newHash, err := utils.HashPassword("admin123")
+				if err != nil {
+					log.Printf("Failed to hash admin password: %v", err)
+				} else {
+					existingAdmin.PasswordHash = newHash
+					if err := db.WithContext(ctx).Save(&existingAdmin).Error; err != nil {
+						log.Printf("Failed to update admin password: %v", err)
+					} else {
+						fmt.Printf("✅ Updated admin password to admin123 for: %s\n", existingAdmin.Email)
+					}
+				}
+			}
+			break
+		}
+	}
+
+	// If no admin user found, create one
+	var adminUserCount int64
+	db.WithContext(ctx).Model(&model.User{}).Where("username = ? OR email IN (?)", "admin", adminEmails).Count(&adminUserCount)
+	if adminUserCount == 0 {
+		// Hash password for admin user
+		passwordHash, err := utils.HashPassword("admin123")
+		if err != nil {
+			log.Printf("Failed to hash admin password: %v", err)
+		} else {
+			adminUser := &model.User{
+				Email:         "admin@massrouter.ai",
+				Username:      "admin",
+				PasswordHash:  passwordHash,
+				Role:          "admin",
+				Status:        "active",
+				EmailVerified: true,
+				CreatedAt:     time.Now(),
+				UpdatedAt:     time.Now(),
+			}
+			if err := db.WithContext(ctx).Create(adminUser).Error; err != nil {
+				log.Printf("Failed to create admin user: %v", err)
+			} else {
+				fmt.Printf("✅ Created admin user: %s (password: admin123)\n", adminUser.Email)
+			}
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"massrouter.ai/backend/internal/controller/billing"
 	"massrouter.ai/backend/internal/controller/health"
 	"massrouter.ai/backend/internal/controller/model"
+	"massrouter.ai/backend/internal/controller/oauth"
 	"massrouter.ai/backend/internal/controller/user"
 	"massrouter.ai/backend/internal/repository"
 	"massrouter.ai/backend/internal/service"
@@ -29,6 +30,8 @@ var RepositorySet = wire.NewSet(
 	repository.NewPaymentRecordRepository,
 	repository.NewModelStatisticRepository,
 	repository.NewSystemConfigRepository,
+	repository.NewOAuthProviderRepository,
+	repository.NewOAuthAccountRepository,
 )
 
 var ServiceSet = wire.NewSet(
@@ -37,10 +40,12 @@ var ServiceSet = wire.NewSet(
 	service.NewModelService,
 	service.NewBillingService,
 	service.NewAdminService,
+	service.NewOAuthService,
 )
 
 var ControllerSet = wire.NewSet(
 	auth.NewController,
+	oauth.NewController,
 	user.NewController,
 	model.NewController,
 	billing.NewController,

@@ -15,6 +15,7 @@ import (
 	"massrouter.ai/backend/internal/controller/billing"
 	"massrouter.ai/backend/internal/controller/health"
 	"massrouter.ai/backend/internal/controller/model"
+	"massrouter.ai/backend/internal/controller/oauth"
 	proxyController "massrouter.ai/backend/internal/controller/proxy"
 	"massrouter.ai/backend/internal/controller/user"
 	"massrouter.ai/backend/internal/repository"
@@ -123,6 +124,10 @@ func InitializeServer(cfg *config.Config) (*Server, error) {
 	// Initialize controllers
 	healthController := health.NewController(db, redisClient)
 	authController := auth.NewController(authService)
+	oauthProviderRepo := repository.NewOAuthProviderRepository(db.DB)
+	oauthAccountRepo := repository.NewOAuthAccountRepository(db.DB)
+	oauthService := service.NewOAuthService(userRepo, oauthProviderRepo, oauthAccountRepo, jwtManager)
+	oauthController := oauth.NewController(oauthService)
 	userController := user.NewController(userService, authService, billingService)
 	modelController := model.NewController(modelService)
 	billingController := billing.NewController(billingService)
@@ -138,6 +143,7 @@ func InitializeServer(cfg *config.Config) (*Server, error) {
 		jwtManager,
 		healthController,
 		authController,
+		oauthController,
 		userController,
 		modelController,
 		billingController,

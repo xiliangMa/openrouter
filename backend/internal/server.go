@@ -14,6 +14,7 @@ import (
 	"massrouter.ai/backend/internal/controller/billing"
 	"massrouter.ai/backend/internal/controller/health"
 	"massrouter.ai/backend/internal/controller/model"
+	"massrouter.ai/backend/internal/controller/oauth"
 	proxyController "massrouter.ai/backend/internal/controller/proxy"
 	"massrouter.ai/backend/internal/controller/user"
 	"massrouter.ai/backend/internal/middleware"
@@ -35,6 +36,7 @@ type Server struct {
 	// Controllers
 	healthController  *health.Controller
 	authController    *auth.Controller
+	oauthController   *oauth.Controller
 	userController    *user.Controller
 	modelController   *model.Controller
 	billingController *billing.Controller
@@ -53,6 +55,7 @@ func NewServer(
 	jwtManager *pkgAuth.JWTManager,
 	healthController *health.Controller,
 	authController *auth.Controller,
+	oauthController *oauth.Controller,
 	userController *user.Controller,
 	modelController *model.Controller,
 	billingController *billing.Controller,
@@ -68,6 +71,7 @@ func NewServer(
 		jwtManager:        jwtManager,
 		healthController:  healthController,
 		authController:    authController,
+		oauthController:   oauthController,
 		userController:    userController,
 		modelController:   modelController,
 		billingController: billingController,
@@ -134,6 +138,11 @@ func (s *Server) setupRouter() {
 			authGroup.POST("/logout", middleware.JWTAuth(s.jwtManager), s.authController.Logout)
 			authGroup.POST("/password/reset/request", s.authController.RequestPasswordReset)
 			authGroup.POST("/password/reset", s.authController.ResetPassword)
+
+			// OAuth routes
+			authGroup.GET("/oauth/providers", s.oauthController.GetOAuthProviders)
+			authGroup.POST("/oauth/start", s.oauthController.StartOAuthFlow)
+			authGroup.POST("/oauth/callback", s.oauthController.HandleOAuthCallback)
 		}
 
 		// Public model routes
@@ -161,6 +170,13 @@ func (s *Server) setupRouter() {
 				userGroup.DELETE("/api-keys/:id", s.userController.DeleteAPIKey)
 				userGroup.GET("/balance", s.userController.GetBalance)
 				userGroup.GET("/usage", s.userController.GetUsageStatistics)
+			}
+
+			// Auth routes (protected)
+			authGroup := protected.Group("/auth")
+			{
+				// OAuth disconnect route
+				authGroup.POST("/oauth/disconnect", s.oauthController.DisconnectOAuthAccount)
 			}
 
 			// Billing routes

@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { BarChart } from 'lucide-react'
+import { useCompare } from '@/lib/hooks/useCompare'
 
 const languageOptions = [
   { value: 'zh', label: '中文', icon: '🇨🇳' },
@@ -23,6 +25,7 @@ const languageOptions = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [language, setLanguage] = useState('zh')
+  const { count } = useCompare()
 
   const currentLanguage = languageOptions.find(lang => lang.value === language) || languageOptions[0]
 
@@ -70,8 +73,8 @@ export default function Navbar() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-4">
-          {/* Language selector - hidden on mobile */}
-          <div className="hidden sm:block">
+          {/* Language selector and compare - hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-2">
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="w-[130px]">
                 <div className="flex items-center gap-2">
@@ -90,6 +93,17 @@ export default function Navbar() {
                 ))}
               </SelectContent>
             </Select>
+            
+            <Button variant="ghost" size="icon" asChild className="relative">
+              <Link href="/compare">
+                <BarChart className="h-5 w-5" />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                    {count > 9 ? '9+' : count}
+                  </span>
+                )}
+              </Link>
+            </Button>
           </div>
 
           {/* Auth buttons */}
@@ -107,20 +121,28 @@ export default function Navbar() {
             <div className="sm:hidden absolute top-16 left-0 right-0 border-t bg-background p-4 shadow-lg">
               <div className="container">
                 <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Link href="/models" className="py-2 text-sm font-medium hover:text-primary transition-colors">
-                      Models
-                    </Link>
-                    <Link href="/pricing" className="py-2 text-sm font-medium hover:text-primary transition-colors">
-                      Pricing
-                    </Link>
-                    <Link href="/documentation" className="py-2 text-sm font-medium hover:text-primary transition-colors">
-                      Documentation
-                    </Link>
-                    <Link href="/blog" className="py-2 text-sm font-medium hover:text-primary transition-colors">
-                      Blog
-                    </Link>
-                  </div>
+                   <div className="grid gap-2">
+                     <Link href="/models" className="py-2 text-sm font-medium hover:text-primary transition-colors">
+                       Models
+                     </Link>
+                     <Link href="/pricing" className="py-2 text-sm font-medium hover:text-primary transition-colors">
+                       Pricing
+                     </Link>
+                     <Link href="/documentation" className="py-2 text-sm font-medium hover:text-primary transition-colors">
+                       Documentation
+                     </Link>
+                     <Link href="/blog" className="py-2 text-sm font-medium hover:text-primary transition-colors">
+                       Blog
+                     </Link>
+                     <Link href="/compare" className="py-2 text-sm font-medium hover:text-primary transition-colors flex items-center justify-between">
+                       <span>Compare Models</span>
+                       {count > 0 && (
+                         <span className="h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                           {count > 9 ? '9+' : count}
+                         </span>
+                       )}
+                     </Link>
+                   </div>
                   <div className="pt-4 border-t">
                     <Select value={language} onValueChange={setLanguage}>
                       <SelectTrigger className="w-full">

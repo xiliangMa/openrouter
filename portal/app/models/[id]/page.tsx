@@ -1,8 +1,10 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useModelDetails } from '@/lib/hooks/useModels'
+import { useCompare } from '@/lib/hooks/useCompare'
 import ProtectedRoute from '@/components/protected-route'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -42,6 +44,8 @@ export default function ModelDetailPage() {
   
   const { data: modelData, isLoading, error } = useModelDetails(modelId)
   const model = modelData?.data
+  const { addModel, removeModel, isInCompare, count } = useCompare()
+  const isComparing = isInCompare(modelId)
   const [selectedTab, setSelectedTab] = useState<'curl' | 'python' | 'javascript'>('curl')
   const [tryModalOpen, setTryModalOpen] = useState(false)
   const [testMessage, setTestMessage] = useState('')
@@ -50,12 +54,37 @@ export default function ModelDetailPage() {
   const [apiKeys, setApiKeys] = useState<any[]>([])
   const [selectedApiKey, setSelectedApiKey] = useState('')
   const [copied, setCopied] = useState(false)
+  const [relatedModels, setRelatedModels] = useState<any[]>([])
+  const [loadingRelated, setLoadingRelated] = useState(false)
 
   useEffect(() => {
     if (tryModalOpen) {
       fetchApiKeys()
     }
   }, [tryModalOpen])
+
+  useEffect(() => {
+    if (!model) return
+
+    const fetchRelatedModels = async () => {
+      setLoadingRelated(true)
+      try {
+        const response = await api.get('/models')
+        const allModels = response.data.data?.models || []
+        const related = allModels.filter((m: any) => 
+          m.id !== model.id && 
+          (m.provider_name === model.provider_name || m.category === model.category)
+        ).slice(0, 4)
+        setRelatedModels(related)
+      } catch (error) {
+        console.error('Failed to fetch related models:', error)
+      } finally {
+        setLoadingRelated(false)
+      }
+    }
+
+    fetchRelatedModels()
+  }, [model])
 
   const fetchApiKeys = async () => {
     try {
@@ -237,10 +266,25 @@ export default function ModelDetailPage() {
                   )}
                 </div>
               </div>
-              <Button size="lg" className="bg-gradient-primary hover:opacity-90" onClick={handleTryButtonClick}>
-                <Code className="mr-2 h-5 w-5" />
-                Try This Model
-              </Button>
+              <div className="flex gap-3">
+                <Button size="lg" className="bg-gradient-primary hover:opacity-90" onClick={handleTryButtonClick}>
+                  <Code className="mr-2 h-5 w-5" />
+                  Try This Model
+                </Button>
+                <Button size="lg" variant={isComparing ? "destructive" : "outline"} onClick={() => isComparing ? removeModel(modelId) : addModel(modelId)}>
+                  {isComparing ? (
+                    <>
+                      <XCircle className="mr-2 h-5 w-5" />
+                      Remove from Compare ({count})
+                    </>
+                  ) : (
+                    <>
+                      <BarChart className="mr-2 h-5 w-5" />
+                      Add to Compare ({count})
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
             
             {model.description && (
@@ -538,9 +582,17 @@ console.log(data);`}
                     <DollarSign className="mr-2 h-4 w-4" />
                     Estimate Cost
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Compare Models
+                  <Button className="w-full justify-start" variant="outline" onClick={() => {
+                    if (isComparing) {
+                      removeModel(modelId)
+                      toast.success('Model removed from comparison')
+                    } else {
+                      addModel(modelId)
+                      toast.success('Model added to comparison')
+                    }
+                  }}>
+                    <BarChart className="mr-2 h-4 w-4" />
+                    {isComparing ? 'Remove from Comparison' : 'Add to Comparison'} ({count})
                   </Button>
                 </CardContent>
               </Card>
@@ -601,8 +653,50 @@ console.log(data);`}
                 </div>
               </div>
             </CardContent>
-           </Card>
-        </div>
+              </Card>
+
+              {/* Related Models */}
+              {relatedModels.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart className="h-5 w-5" />
+                      Related Models
+                    </CardTitle>
+                    <CardDescription>Other models you might be interested in</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {relatedModels.map((related) => (
+                        <div key={related.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold">{related.name}</h4>
+                            <Badge variant="outline">{related.provider_name}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{related.description || 'No description'}</p>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">
+                              Input: ${related.input_price?.toFixed(6) || '0.000000'}
+                            </span>
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link href={`/models/${related.id}`}>
+                                View Details
+                                <ChevronRight className="ml-1 h-3 w-3" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {loadingRelated && (
+                      <div className="text-center py-4">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
         {/* Try Model Dialog */}
         <Dialog open={tryModalOpen} onOpenChange={setTryModalOpen}>
