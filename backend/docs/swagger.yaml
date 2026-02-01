@@ -1,0 +1,1711 @@
+basePath: /api/v1
+definitions:
+  openrouter_ai_backend_internal_service.AdminUpdateUserRequest:
+    properties:
+      role:
+        enum:
+        - user
+        - admin
+        type: string
+      status:
+        enum:
+        - active
+        - suspended
+        - deleted
+        type: string
+    type: object
+  openrouter_ai_backend_internal_service.CreateAPIKeyRequest:
+    properties:
+      expires_in:
+        description: seconds
+        minimum: 3600
+        type: integer
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      permissions:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      rate_limit:
+        maximum: 10000
+        minimum: 1
+        type: integer
+    required:
+    - name
+    - permissions
+    - rate_limit
+    type: object
+  openrouter_ai_backend_internal_service.CreateModelProviderRequest:
+    properties:
+      api_base_url:
+        type: string
+      api_key:
+        type: string
+      config:
+        additionalProperties: true
+        type: object
+      name:
+        type: string
+    required:
+    - api_base_url
+    - config
+    - name
+    type: object
+  openrouter_ai_backend_internal_service.CreateModelRequest:
+    properties:
+      capabilities:
+        additionalProperties: true
+        type: object
+      category:
+        type: string
+      context_length:
+        type: integer
+      description:
+        type: string
+      input_price:
+        minimum: 0
+        type: number
+      is_free:
+        type: boolean
+      max_tokens:
+        type: integer
+      name:
+        type: string
+      output_price:
+        minimum: 0
+        type: number
+      pricing_tier:
+        type: string
+      provider_id:
+        type: string
+    required:
+    - capabilities
+    - input_price
+    - name
+    - output_price
+    - provider_id
+    type: object
+  openrouter_ai_backend_internal_service.CreatePaymentRequest:
+    properties:
+      amount:
+        minimum: 0.01
+        type: number
+      currency:
+        type: string
+      payment_method:
+        type: string
+      return_url:
+        type: string
+    required:
+    - amount
+    - currency
+    - payment_method
+    type: object
+  openrouter_ai_backend_internal_service.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  openrouter_ai_backend_internal_service.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  openrouter_ai_backend_internal_service.UpdateModelProviderRequest:
+    properties:
+      api_base_url:
+        type: string
+      api_key:
+        type: string
+      config:
+        additionalProperties: true
+        type: object
+      status:
+        enum:
+        - active
+        - disabled
+        type: string
+    type: object
+  openrouter_ai_backend_internal_service.UpdateModelRequest:
+    properties:
+      capabilities:
+        additionalProperties: true
+        type: object
+      category:
+        type: string
+      context_length:
+        type: integer
+      description:
+        type: string
+      input_price:
+        minimum: 0
+        type: number
+      is_active:
+        type: boolean
+      max_tokens:
+        type: integer
+      name:
+        type: string
+      output_price:
+        minimum: 0
+        type: number
+      pricing_tier:
+        type: string
+    type: object
+  openrouter_ai_backend_internal_service.UpdateProfileRequest:
+    properties:
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@massrouter.ai
+    name: API Support
+    url: http://www.massrouter.ai/support
+  description: This is the MassRouter SaaS Platform API server.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: MassRouter SaaS Platform API
+  version: "1.0"
+paths:
+  /api/v1/admin/config/{key}:
+    put:
+      consumes:
+      - application/json
+      description: Update system configuration value (admin only)
+      parameters:
+      - description: Config key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: Config value
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System config updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update system config (admin)
+      tags:
+      - admin
+  /api/v1/admin/models:
+    post:
+      consumes:
+      - application/json
+      description: Create a new model (admin only)
+      parameters:
+      - description: Model creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.CreateModelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Model created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create model (admin)
+      tags:
+      - admin
+  /api/v1/admin/models/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update model information (admin only)
+      parameters:
+      - description: Model ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Model update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.UpdateModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Model updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Model not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update model (admin)
+      tags:
+      - admin
+  /api/v1/admin/providers:
+    post:
+      consumes:
+      - application/json
+      description: Create a new model provider (admin only)
+      parameters:
+      - description: Model provider creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.CreateModelProviderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Model provider created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create model provider (admin)
+      tags:
+      - admin
+  /api/v1/admin/providers/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update model provider information (admin only)
+      parameters:
+      - description: Provider ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Model provider update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.UpdateModelProviderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Model provider updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Model provider not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update model provider (admin)
+      tags:
+      - admin
+  /api/v1/admin/stats:
+    get:
+      description: Get system statistics and metrics (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System statistics retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get system statistics (admin)
+      tags:
+      - admin
+  /api/v1/admin/users:
+    get:
+      description: Get paginated list of users with filtering (admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      - description: Filter by role (user, admin)
+        in: query
+        name: role
+        type: string
+      - description: Filter by status (active, suspended, deleted)
+        in: query
+        name: status
+        type: string
+      - description: Sort field
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order (asc, desc)
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List users (admin)
+      tags:
+      - admin
+  /api/v1/admin/users/{id}:
+    get:
+      description: Get detailed user information (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - missing ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user details (admin)
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Update user information (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.AdminUpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user (admin)
+      tags:
+      - admin
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - account suspended or deleted
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate user's refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - auth
+  /api/v1/auth/password/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset user password using verification token
+      parameters:
+      - description: Password reset confirmation
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Reset password with token
+      tags:
+      - auth
+  /api/v1/auth/password/reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Send password reset email to user
+      parameters:
+      - description: Password reset request
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reset email sent if account exists
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Request password reset
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get new access token using refresh token
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refresh successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - refresh token expired or invalid
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with email, username and password
+      parameters:
+      - description: Register request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Registration successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict - email or username already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /api/v1/auth/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verify user's email address with token
+      parameters:
+      - description: Verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email verification endpoint
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - token missing
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify email address
+      tags:
+      - auth
+  /api/v1/billing/balance:
+    get:
+      description: Get current user's billing balance information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get billing balance
+      tags:
+      - billing
+  /api/v1/billing/calculate-cost:
+    post:
+      description: Calculate cost for using a model with given token counts
+      parameters:
+      - description: Model ID
+        in: query
+        name: model_id
+        required: true
+        type: string
+      - default: 0
+        description: Input tokens
+        in: query
+        minimum: 0
+        name: input_tokens
+        type: integer
+      - default: 0
+        description: Output tokens
+        in: query
+        minimum: 0
+        name: output_tokens
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cost calculated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - missing or invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Model not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Calculate cost
+      tags:
+      - billing
+  /api/v1/billing/payments:
+    get:
+      description: Get paginated payment history for current user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment history retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get payment history
+      tags:
+      - billing
+    post:
+      consumes:
+      - application/json
+      description: Create a new payment for current user
+      parameters:
+      - description: Payment creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Payment created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create payment
+      tags:
+      - billing
+  /api/v1/billing/records:
+    get:
+      description: Get paginated billing records (usage charges) for current user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Billing records retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get billing records
+      tags:
+      - billing
+  /api/v1/billing/webhook:
+    post:
+      consumes:
+      - application/json
+      description: Process payment webhook from payment provider (requires signature
+        verification)
+      parameters:
+      - description: Webhook signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Webhook payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Webhook processed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - missing signature or invalid payload
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Process payment webhook
+      tags:
+      - billing
+  /api/v1/health:
+    get:
+      description: Comprehensive health check of all system components
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System is healthy
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: System is degraded
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /api/v1/live:
+    get:
+      description: Check if application is running (no dependencies)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application is alive
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Liveness check
+      tags:
+      - health
+  /api/v1/models:
+    get:
+      description: Get paginated list of available models with filtering
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by provider
+        in: query
+        name: provider
+        type: string
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      - description: Filter by free status
+        in: query
+        name: is_free
+        type: boolean
+      - description: Sort field (name, price, created_at)
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order (asc, desc)
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Models retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List models
+      tags:
+      - model
+  /api/v1/models/{id}:
+    get:
+      description: Get detailed information about a specific model
+      parameters:
+      - description: Model ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Model details retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - missing ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Model not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get model details
+      tags:
+      - model
+  /api/v1/models/categories:
+    get:
+      description: Get list of all model categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Categories retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get model categories
+      tags:
+      - model
+  /api/v1/models/providers:
+    get:
+      description: Get list of all model providers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Providers retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get model providers
+      tags:
+      - model
+  /api/v1/models/search:
+    get:
+      description: Search models with advanced filtering
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - collectionFormat: csv
+        description: Filter by categories
+        in: query
+        items:
+          type: string
+        name: categories
+        type: array
+      - collectionFormat: csv
+        description: Filter by providers
+        in: query
+        items:
+          type: string
+        name: providers
+        type: array
+      - description: Minimum price per token
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price per token
+        in: query
+        name: max_price
+        type: number
+      - description: Filter by free status
+        in: query
+        name: is_free
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Search results retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Search models
+      tags:
+      - model
+  /api/v1/ready:
+    get:
+      description: Check if system is ready to accept traffic
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System is ready
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: System is not ready
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Readiness check
+      tags:
+      - health
+  /api/v1/user/api-keys:
+    get:
+      description: Get list of current user's API keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API keys retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for current user
+      parameters:
+      - description: API key creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.CreateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: API key created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - user
+  /api/v1/user/api-keys/{id}:
+    delete:
+      description: Delete an API key by ID
+      parameters:
+      - description: API key ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API key deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - missing ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - unauthorized to delete this key
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: API key not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete API key
+      tags:
+      - user
+  /api/v1/user/balance:
+    get:
+      description: Get current user's balance information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user balance
+      tags:
+      - user
+  /api/v1/user/password/change:
+    post:
+      consumes:
+      - application/json
+      description: Change current user's password
+      parameters:
+      - description: Password change request
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input or incorrect current password
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change password
+      tags:
+      - user
+  /api/v1/user/profile:
+    get:
+      description: Get current user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update current user's profile information
+      parameters:
+      - description: Profile update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/openrouter_ai_backend_internal_service.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Username already taken
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - user
+  /api/v1/user/usage:
+    get:
+      description: Get current user's usage statistics for a date range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usage statistics retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get usage statistics
+      tags:
+      - user
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

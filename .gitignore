@@ -1,0 +1,121 @@
+# Dependency directories
+node_modules/
+vendor/
+.next/
+
+# Build outputs
+dist/
+build/
+out/
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+coverage.html
+coverage.txt
+profile.out
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Next.js
+.next/
+out/
+
+# Gatsby
+.cache/
+public
+
+# Nuxt.js
+.nuxt
+.output
+
+# Vue
+dist/
+node_modules/
+
+# Svelte
+.svelte-kit
+
+# Rollup
+dist/
+
+# Parcel
+.parcel-cache
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# Stores
+.store/
+
+# End of https://www.toptal.com/developers/gitignore/api/go,node,vue,react,nextjs,visualstudiocode
