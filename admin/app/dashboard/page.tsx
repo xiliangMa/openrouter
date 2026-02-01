@@ -2,12 +2,14 @@
 
 import ProtectedRoute from '@/components/protected-route';
 import { useAuth } from '@/lib/auth';
+import { useSystemStats } from '@/lib/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, CreditCard, Users, Zap, DollarSign, Settings, Bell, ChevronDown, Shield, Server, Key } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const { data: stats, isLoading, error } = useSystemStats();
 
   return (
     <ProtectedRoute>
@@ -71,51 +73,87 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="card-hover">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">1,847</div>
-                  <p className="text-xs text-gray-500">+12% from last month</p>
-                </CardContent>
-              </Card>
+            {isLoading ? (
+              <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <Card key={i} className="card-hover">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-600">Loading...</CardTitle>
+                      <div className="h-4 w-4 animate-pulse bg-gray-200 rounded"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-gray-900">
+                        <div className="h-8 w-20 animate-pulse bg-gray-200 rounded"></div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <div className="h-4 w-24 animate-pulse bg-gray-200 rounded"></div>
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600">Failed to load system statistics. Please try again later.</p>
+                <p className="text-sm text-red-500 mt-1">Error: {error.message}</p>
+              </div>
+            ) : (
+              <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <Card className="card-hover">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-primary" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-gray-900">{stats?.data?.total_users?.toLocaleString() || '0'}</div>
+                    <p className="text-xs text-gray-500">
+                      {stats?.data?.active_users ? `${stats.data.active_users.toLocaleString()} active` : 'No active users'}
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card className="card-hover">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">API Requests</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">245.2K</div>
-                  <p className="text-xs text-gray-500">+23% from last week</p>
-                </CardContent>
-              </Card>
+                <Card className="card-hover">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">API Requests</CardTitle>
+                    <BarChart3 className="h-4 w-4 text-purple-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-gray-900">{stats?.data?.total_requests?.toLocaleString() || '0'}</div>
+                    <p className="text-xs text-gray-500">
+                      {stats?.data?.daily_requests ? `${stats.data.daily_requests.toLocaleString()} today` : 'No requests today'}
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card className="card-hover">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">$12,847</div>
-                  <p className="text-xs text-gray-500">+18% from last month</p>
-                </CardContent>
-              </Card>
+                <Card className="card-hover">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
+                    <DollarSign className="h-4 w-4 text-green-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-gray-900">${stats?.data?.total_revenue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</div>
+                    <p className="text-xs text-gray-500">
+                      {stats?.data?.daily_revenue ? `$${stats.data.daily_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} today` : 'No revenue today'}
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card className="card-hover">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">System Health</CardTitle>
-                  <Server className="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">99.8%</div>
-                  <p className="text-xs text-gray-500">Uptime this month</p>
-                </CardContent>
-              </Card>
-            </div>
+                <Card className="card-hover">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">System Health</CardTitle>
+                    <Server className="h-4 w-4 text-blue-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {stats?.data?.server_status?.database && stats?.data?.server_status?.redis ? '100%' : 'Degraded'}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {stats?.data?.server_status?.uptime ? `Uptime: ${stats.data.server_status.uptime}` : 'Status unknown'}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Main Content Grid */}
             <div className="grid gap-8 lg:grid-cols-3">

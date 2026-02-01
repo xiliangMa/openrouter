@@ -136,6 +136,16 @@ func (s *Server) setupRouter() {
 			authGroup.POST("/password/reset", s.authController.ResetPassword)
 		}
 
+		// Public model routes
+		publicModelGroup := api.Group("/models")
+		{
+			publicModelGroup.GET("", s.modelController.ListModels)
+			publicModelGroup.GET("/search", s.modelController.SearchModels)
+			publicModelGroup.GET("/:id", s.modelController.GetModelDetails)
+			publicModelGroup.GET("/providers", s.modelController.GetModelProviders)
+			publicModelGroup.GET("/categories", s.modelController.GetModelCategories)
+		}
+
 		// Protected routes (require authentication)
 		protected := api.Group("")
 		protected.Use(middleware.JWTAuth(s.jwtManager))
@@ -151,16 +161,6 @@ func (s *Server) setupRouter() {
 				userGroup.DELETE("/api-keys/:id", s.userController.DeleteAPIKey)
 				userGroup.GET("/balance", s.userController.GetBalance)
 				userGroup.GET("/usage", s.userController.GetUsageStatistics)
-			}
-
-			// Model routes
-			modelGroup := protected.Group("/models")
-			{
-				modelGroup.GET("", s.modelController.ListModels)
-				modelGroup.GET("/search", s.modelController.SearchModels)
-				modelGroup.GET("/:id", s.modelController.GetModelDetails)
-				modelGroup.GET("/providers", s.modelController.GetModelProviders)
-				modelGroup.GET("/categories", s.modelController.GetModelCategories)
 			}
 
 			// Billing routes

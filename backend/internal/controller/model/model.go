@@ -26,7 +26,6 @@ func NewController(modelService service.ModelService) *Controller {
 // @Description Get paginated list of available models with filtering
 // @Tags model
 // @Produce json
-// @Security BearerAuth
 // @Param page query integer false "Page number" default(1) minimum(1)
 // @Param limit query integer false "Items per page" default(20) minimum(1) maximum(100)
 // @Param category query string false "Filter by category"
@@ -37,7 +36,6 @@ func NewController(modelService service.ModelService) *Controller {
 // @Param sort_order query string false "Sort order (asc, desc)"
 // @Success 200 {object} map[string]interface{} "Models retrieved successfully"
 // @Failure 400 {object} map[string]interface{} "Bad request - invalid parameters"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/models [get]
 func (c *Controller) ListModels(ctx *gin.Context) {
@@ -103,11 +101,9 @@ func (c *Controller) ListModels(ctx *gin.Context) {
 // @Description Get detailed information about a specific model
 // @Tags model
 // @Produce json
-// @Security BearerAuth
 // @Param id path string true "Model ID"
 // @Success 200 {object} map[string]interface{} "Model details retrieved successfully"
 // @Failure 400 {object} map[string]interface{} "Bad request - missing ID"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 404 {object} map[string]interface{} "Model not found"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/models/{id} [get]
@@ -155,7 +151,6 @@ func (c *Controller) GetModelDetails(ctx *gin.Context) {
 // @Description Search models with advanced filtering
 // @Tags model
 // @Produce json
-// @Security BearerAuth
 // @Param q query string false "Search query"
 // @Param categories query []string false "Filter by categories"
 // @Param providers query []string false "Filter by providers"
@@ -163,7 +158,6 @@ func (c *Controller) GetModelDetails(ctx *gin.Context) {
 // @Param max_price query number false "Maximum price per token"
 // @Param is_free query boolean false "Filter by free status"
 // @Success 200 {object} map[string]interface{} "Search results retrieved successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/models/search [get]
 func (c *Controller) SearchModels(ctx *gin.Context) {
@@ -220,9 +214,7 @@ func (c *Controller) SearchModels(ctx *gin.Context) {
 // @Description Get list of all model providers
 // @Tags model
 // @Produce json
-// @Security BearerAuth
 // @Success 200 {object} map[string]interface{} "Providers retrieved successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/models/providers [get]
 func (c *Controller) GetModelProviders(ctx *gin.Context) {
@@ -251,9 +243,7 @@ func (c *Controller) GetModelProviders(ctx *gin.Context) {
 // @Description Get list of all model categories
 // @Tags model
 // @Produce json
-// @Security BearerAuth
 // @Success 200 {object} map[string]interface{} "Categories retrieved successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/models/categories [get]
 func (c *Controller) GetModelCategories(ctx *gin.Context) {

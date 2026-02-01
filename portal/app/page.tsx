@@ -1,16 +1,21 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useModels } from '@/lib/hooks/useModels'
 
 export default function Home() {
-  const models = [
-    { name: 'GPT-4o', provider: 'OpenAI', category: 'Chat', price: '$0.005 / 1K tokens', context: '128K', capabilities: ['Text', 'Vision'] },
-    { name: 'Claude 3 Sonnet', provider: 'Anthropic', category: 'Chat', price: '$0.003 / 1K tokens', context: '200K', capabilities: ['Text', 'Vision'] },
-    { name: 'Gemini 1.5 Pro', provider: 'Google', category: 'Chat', price: '$0.00125 / 1K tokens', context: '1M', capabilities: ['Text', 'Vision', 'Audio'] },
-    { name: 'Llama 3 70B', provider: 'Meta', category: 'Chat', price: '$0.0009 / 1K tokens', context: '8K', capabilities: ['Text'] },
-    { name: 'Command R', provider: 'Cohere', category: 'Chat', price: '$0.0005 / 1K tokens', context: '128K', capabilities: ['Text'] },
-    { name: 'GPT-3.5 Turbo', provider: 'OpenAI', category: 'Chat', price: '$0.0005 / 1K tokens', context: '16K', capabilities: ['Text'] },
-  ]
+  const { data, isLoading, error } = useModels({ limit: 6 });
+  
+  const models = data?.data?.models?.map(model => ({
+    name: model.name,
+    provider: model.provider_name,
+    category: model.category || 'Chat',
+    price: `$${model.input_price.toFixed(5)} input / $${model.output_price.toFixed(5)} output per token`,
+    context: model.context_length ? `${model.context_length.toLocaleString()} tokens` : 'N/A',
+    capabilities: Object.keys(model.capabilities || {}),
+  })) || [];
 
   return (
     <>
@@ -77,42 +82,59 @@ export default function Home() {
             <h2 className="text-3xl font-bold">Popular Models</h2>
             <Button variant="outline">View All Models</Button>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {models.map((model, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{model.name}</CardTitle>
-                      <CardDescription>{model.provider}</CardDescription>
-                    </div>
-                    <Badge variant="secondary">{model.category}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="text-2xl font-bold">{model.price}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Context Length</p>
-                      <p className="font-medium">{model.context}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Capabilities</p>
-                      <div className="flex flex-wrap gap-2">
-                        {model.capabilities.map((cap, i) => (
-                          <Badge key={i} variant="outline">{cap}</Badge>
-                        ))}
+          {isLoading ? (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">Loading models...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-10">
+              <p className="text-red-500">Failed to load models. Please try again later.</p>
+              <p className="text-sm text-muted-foreground mt-2">Error: {error.message}</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {models.map((model, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{model.name}</CardTitle>
+                        <CardDescription>{model.provider}</CardDescription>
                       </div>
+                      <Badge variant="secondary">{model.category}</Badge>
                     </div>
-                    <Button className="w-full">Try Now</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Price</p>
+                        <p className="text-2xl font-bold">{model.price}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Context Length</p>
+                        <p className="font-medium">{model.context}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Capabilities</p>
+                        <div className="flex flex-wrap gap-2">
+                          {model.capabilities.map((cap, i) => (
+                            <Badge key={i} variant="outline">{cap}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <Button className="w-full">Try Now</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Debug Info */}
+        <div className="mt-8 p-4 bg-gray-100 rounded-lg text-sm">
+          <p>Debug: isLoading={isLoading ? 'true' : 'false'}, error={error ? error.message : 'null'}, data={data ? 'present' : 'null'}</p>
+          {data && <p>Data keys: {Object.keys(data).join(', ')}</p>}
+          {data?.data && <p>Models count: {data.data.models?.length || 0}</p>}
         </div>
       </section>
 
