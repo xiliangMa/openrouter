@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ func NewController(oauthService service.OAuthService) *Controller {
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/auth/oauth/providers [get]
 func (c *Controller) GetOAuthProviders(ctx *gin.Context) {
+	log.Printf("GetOAuthProviders called, path: %s", ctx.Request.URL.Path)
 	providers, err := c.oauthService.GetEnabledProviders(ctx.Request.Context())
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
