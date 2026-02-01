@@ -11,8 +11,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+const languageOptions = [
+  { value: 'zh', label: '中文', icon: '🇨🇳' },
+  { value: 'en', label: 'English', icon: '🇺🇸' },
+  { value: 'ja', label: '日本語', icon: '🇯🇵' },
+  { value: 'ko', label: '한국어', icon: '🇰🇷' },
+  { value: 'es', label: 'Español', icon: '🇪🇸' },
+  { value: 'fr', label: 'Français', icon: '🇫🇷' },
+]
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [language, setLanguage] = useState('zh')
+
+  const currentLanguage = languageOptions.find(lang => lang.value === language) || languageOptions[0]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -60,17 +72,22 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {/* Language selector - hidden on mobile */}
           <div className="hidden sm:block">
-            <Select defaultValue="en">
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Language" />
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-[130px]">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{currentLanguage.icon}</span>
+                  <span>{currentLanguage.label}</span>
+                </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="zh">中文</SelectItem>
-                <SelectItem value="ja">日本語</SelectItem>
-                <SelectItem value="ko">한국어</SelectItem>
-                <SelectItem value="es">Español</SelectItem>
-                <SelectItem value="fr">Français</SelectItem>
+                {languageOptions.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{lang.icon}</span>
+                      <span>{lang.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -105,17 +122,22 @@ export default function Navbar() {
                     </Link>
                   </div>
                   <div className="pt-4 border-t">
-                    <Select defaultValue="en">
+                    <Select value={language} onValueChange={setLanguage}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Language" />
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{currentLanguage.icon}</span>
+                          <span>{currentLanguage.label}</span>
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="zh">中文</SelectItem>
-                        <SelectItem value="ja">日本語</SelectItem>
-                        <SelectItem value="ko">한국어</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="fr">Français</SelectItem>
+                        {languageOptions.map((lang) => (
+                          <SelectItem key={lang.value} value={lang.value}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{lang.icon}</span>
+                              <span>{lang.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
